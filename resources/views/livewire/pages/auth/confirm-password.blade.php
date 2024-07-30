@@ -53,9 +53,9 @@ $confirmPassword = function () {
         </div>
 
         <div class="flex justify-end mt-4">
-            <x-primary-button>
+            <x-primary2-button>
                 {{ __('Confirm') }}
-            </x-primary-button>
+            </x-primary2-button>
         </div>
     </form>
 </div>
