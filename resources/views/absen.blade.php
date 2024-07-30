@@ -9,18 +9,23 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 @if (!$sudah_absen)
-                    <div class="p-6 text-center text-gray-900 dark:text-gray-100">
-                        {{ __('Anda belum absen hari ini!') }}
+                    <div class="flex flex-row justify-center items-center gap-4">
+                        <img src="https://img.icons8.com/?size=100&id=21181&format=png&color=000000" alt="Check Icon"
+                            class="w-10 h-10 mt-1">
+                        <div class="font-bold text-center py-6 text-xl text-red-500 dark:text-red-400">
+                            {{ __('Anda belum absen hari ini!') }}
+                        </div>
                     </div>
 
-                    <form action="{{ route('absen.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('absen.store') }}" method="POST" enctype="multipart/form-data"
+                        class="flex flex-col items-center">
                         @csrf
 
                         <div id="imagePreview" class="mb-3 w-1/2 mx-auto"></div>
 
                         <div class="flex justify-center items-center w-full">
                             <label for="proof_photo"
-                                class="flex flex-col justify-center items-center w-full h-44 bg-gray-300 dark:bg-gray-50 rounded-lg border-1 border-gray-300 border-dashed cursor-pointer hover:bg-gray-200">
+                                class="flex flex-col justify-center items-center mt-4 w-3/4 md:w-1/2 h-44 bg-gray-300 dark:bg-gray-50 rounded-lg border-1 border-gray-300 border-dashed cursor-pointer hover:bg-gray-200">
 
                                 <input type="file" name="proof_photo" id="proof_photo" class="hidden"
                                     onchange="displayImagePreview(this); checkFileInput();">
@@ -41,40 +46,66 @@
                             </label>
                         </div>
                         <button type="submit" id="submitButton" disabled
-                            class="cursor-pointer mt-3 w-full text-white bg-blue-500 font-medium rounded-lg text-base px-5 py-2.5 text-center items-center">
+                            class="cursor-pointer my-8 w-3/4 md:w-1/2 text-white bg-blue-500 font-medium rounded-lg text-base px-5 py-2.5 text-center items-center">
                             ABSEN
                         </button>
                     </form>
                 @else
-                    <div class="p-6 text-gray-900 dark:text-gray-100">
-                        {{ __('Anda sudah absen hari ini') }}
+                    <div class="flex flex-row justify-center items-center gap-4">
+                        <img src="https://img.icons8.com/?size=100&id=19Qs7U6PcAie&format=png&color=000000"
+                            alt="Check Icon" class="w-10 h-10 mt-1">
+                        <div class="font-bold text-center py-6 text-xl text-green-500 dark:text-green-400">
+                            {{ __('Anda sudah absen hari ini!') }}
+                        </div>
                     </div>
-                    <div class="p-6 text-gray-900 dark:text-gray-100">
-                        {{ 'Tanggal: ' . $user_day->date }}
+                    <div class="text-lg italic text-center p-2 text-gray-900 dark:text-gray-100">
+                        {{ \Carbon\Carbon::parse($user_day->date)->translatedFormat('l, d F Y') }}
                     </div>
-                    <div class="p-6 text-gray-900 dark:text-gray-100">
-                        {{ 'Status: ' . $user_day->status }}
-                    </div>
-                    <div class="p-6 text-gray-900 dark:text-gray-100">
-                        {{ 'Masuk: ' . $user_day->time_in }}
-                    </div>
-                    @if ($user_day->time_out == null)
-                        <div class="p-6 text-gray-900 dark:text-gray-100">
-                            {{ 'Pulang: Belum' }}
+
+                    @if ($user_day->status == 'Hadir')
+                        <div class="text-center p-2 text-green-500 dark:text-green-400">
+                            {{ 'Masuk: ' . $user_day->time_in . ' - ' . $user_day->status }}
+                        </div>
+                    @elseif($user_day->status == 'Terlambat')
+                        <div class="text-center p-2 text-red-500 dark:text-red-400">
+                            {{ 'Masuk: ' . $user_day->time_in . ' - ' . $user_day->status }}
                         </div>
                     @else
-                        <div class="p-6 text-gray-900 dark:text-gray-100">
-                            {{ 'Pulang: ' . $user_day->time_out }}
+                        <div class="text-center p-2 text-gray-900 dark:text-gray-100">
+                            {{ 'Masuk: ' . $user_day->time_in }}
                         </div>
                     @endif
 
-                    <form action="{{ route('absen.update', $user_day) }}" method="POST" enctype="multipart/form-data">
-                        @method('put')
-                        @csrf
-                    </form>
+
+                    @if ($user_day->time_out == null)
+                        <div class="text-center p-2 text-blue-500 dark:text-blue-400">
+                            {{ 'Pulang: Masih Kerja' }}
+                        </div>
+
+                        <form action="{{ route('absen.update', $user_day) }}" method="POST"
+                            enctype="multipart/form-data" class="flex flex-col items-center">
+                            @method('put')
+                            @csrf
+
+                            <button type="submit"
+                                class="cursor-pointer my-8 w-3/4 md:w-1/2 text-white bg-orange-500 font-medium rounded-lg text-base px-5 py-2.5 text-center items-center">
+                                PULANG
+                            </button>
+                        </form>
+                    @else
+                        @if ($user_day->status == 'Pulang')
+                            <div class="text-center p-2 text-green-500 dark:text-green-400">
+                                {{ 'Pulang: ' . $user_day->time_out . ' - ' . $user_day->status }}
+                            </div>
+                        @elseif($user_day->status == 'Pulang Cepat')
+                            <div class="text-center p-2 text-red-500 dark:text-red-400">
+                                {{ 'Pulang: ' . $user_day->time_out . ' - ' . $user_day->status }}
+                            </div>
+                        @endif
+                    @endif
 
                     <img src="{{ asset('storage/' . $user_day->proof_photo) }}" alt="Bukti Absen"
-                        class="w-1/4 mx-auto rounded-lg object-cover">
+                        class="w-1/2 mt-4 mx-auto rounded-lg object-cover">
 
                 @endif
             </div>

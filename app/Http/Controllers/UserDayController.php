@@ -17,26 +17,73 @@ class UserDayController extends Controller
      * Display a listing of the resource.
      */
 
-     public function index() // absen
-     {
-         $today = now()->toDateString(); // Get today's date
+    public function index() // absen
+    {
+        $today = now()->toDateString(); // Get today's date
 
-         // memang MERAH ini :")
-         $sudahAbsenToday = Auth::user()->user_day()->where('date', $today)->exists();
-         $userDay = Auth::user()->user_day()->where('date', $today)->first();
+        // memang MERAH ini :")
+        $sudahAbsenToday = Auth::user()->user_day()->where('date', $today)->exists();
+        $userDay = Auth::user()->user_day()->where('date', $today)->first();
 
-         if (!$sudahAbsenToday) { // ! - belum absen
-             return view('absen', [
-                 'sudah_absen' => $sudahAbsenToday,
-                 'user_day' => null,
-             ]);
-         } else {
-             return view('absen', [
-                 'sudah_absen' => $sudahAbsenToday,
-                 'user_day' => $userDay,
-             ]);
-         }
-     }
+        if (!$sudahAbsenToday) { // ! - belum absen
+            return view('absen', [
+                'sudah_absen' => $sudahAbsenToday,
+                'user_day' => null,
+            ]);
+        } else {
+            return view('absen', [
+                'sudah_absen' => $sudahAbsenToday,
+                'user_day' => $userDay,
+            ]);
+        }
+    }
+
+    public function daftar_absen(Request $request)
+    {
+        $today = now()->toDateString();
+
+        // Get the search query from the request
+        $search = $request->input('search');
+
+        // Fetch user IDs who have records for the specified date
+        $usersWithRecords = User_Day::where('date', $today)
+            ->pluck('user_id');
+
+        // Fetch all users who do not have records for the specified date
+        $usersWithNoRecords = User::whereNotIn('id', $usersWithRecords)
+            ->when($search, function ($query, $search) {
+                return $query->where('name', 'like', "%{$search}%");
+            })
+            ->paginate(10);
+
+        // Fetch user days for the specified date
+        $daftar_user_day = User_Day::where('date', $today)
+            ->when($search, function ($query, $search) {
+                return $query->whereHas('user', function ($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%");
+                });
+            })
+            ->paginate(10);
+
+        // Define custom order for statuses
+        $order = [
+            'Pulang Cepat' => 1,
+            'Pulang' => 2,
+            'Terlambat' => 3,
+            'Hadir' => 4,
+        ];
+
+        // Sort the collection based on custom status order
+        $daftar_user_day = $daftar_user_day->sort(function ($a, $b) use ($order) {
+            return $order[$a->status] <=> $order[$b->status];
+        });
+
+        // Return the view with sorted user days and users without records
+        return view('daftar_absen', [
+            'daftar_user_day' => $daftar_user_day,
+            'not_hadir_users' => $usersWithNoRecords,
+        ]);
+    }
 
 
     /**

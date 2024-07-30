@@ -10,9 +10,6 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-// Route::view('absen', 'absen')
-//     ->middleware(['auth', 'verified'])
-//     ->name('absen');
 Route::get('/absen', [UserDayController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('absen');
@@ -21,11 +18,15 @@ Route::post('/absen/new', [UserDayController::class, 'store'])
     ->middleware(['auth', 'verified'])
     ->name('absen.store');
 
-Route::put('/absen/update/{user_day}', [UserDayController::class, 'update'])
+Route::put('/absen/update/{user_Day}', [UserDayController::class, 'update'])
     ->middleware(['auth', 'verified'])
     ->name('absen.update');
 
-Route::view('daftar_absen', 'daftar_absen')
+Route::get('/daftar_absen', [UserDayController::class, 'daftar_absen'])
+    ->middleware(['auth', 'verified', 'owner'])
+    ->name('daftar_absen');
+
+Route::get('/daftar_absen', [UserDayController::class, 'daftar_absen'])
     ->middleware(['auth', 'verified', 'supervisor'])
     ->name('daftar_absen');
 

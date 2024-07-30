@@ -12,7 +12,7 @@
                     {{ __("IN PROGRESS!") }}
                 </div>
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-                    {{ __("Tahap testing untuk absen, bisa pindah ke halaman Absen~") }}
+                    {{ __("Tahap testing untuk absen, bisa pindah ke halaman Absen atau klik pojok kanan atas untuk edit Profile~") }}
                 </div>
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     {{ __("Jika button Dark & Light mode ngefreeze, bisa refresh website ini!") }}
