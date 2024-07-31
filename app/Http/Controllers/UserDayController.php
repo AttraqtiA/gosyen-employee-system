@@ -40,49 +40,54 @@ class UserDayController extends Controller
 
     public function daftar_absen(Request $request)
     {
-        $today = now()->toDateString();
+        if (Auth::user()->role == 1 || Auth::user()->role == 2) {
 
-        // Get the search query from the request
-        $search = $request->input('search');
+            $today = now()->toDateString();
 
-        // Fetch user IDs who have records for the specified date
-        $usersWithRecords = User_Day::where('date', $today)
-            ->pluck('user_id');
+            // Get the search query from the request
+            $search = $request->input('search');
 
-        // Fetch all users who do not have records for the specified date
-        $usersWithNoRecords = User::whereNotIn('id', $usersWithRecords)
-            ->when($search, function ($query, $search) {
-                return $query->where('name', 'like', "%{$search}%");
-            })
-            ->paginate(10);
+            // Fetch user IDs who have records for the specified date
+            $usersWithRecords = User_Day::where('date', $today)
+                ->pluck('user_id');
 
-        // Fetch user days for the specified date
-        $daftar_user_day = User_Day::where('date', $today)
-            ->when($search, function ($query, $search) {
-                return $query->whereHas('user', function ($query) use ($search) {
-                    $query->where('name', 'like', "%{$search}%");
-                });
-            })
-            ->paginate(10);
+            // Fetch all users who do not have records for the specified date
+            $usersWithNoRecords = User::whereNotIn('id', $usersWithRecords)
+                ->when($search, function ($query, $search) {
+                    return $query->where('name', 'like', "%{$search}%");
+                })
+                ->paginate(10);
 
-        // Define custom order for statuses
-        $order = [
-            'Pulang Cepat' => 1,
-            'Pulang' => 2,
-            'Terlambat' => 3,
-            'Hadir' => 4,
-        ];
+            // Fetch user days for the specified date
+            $daftar_user_day = User_Day::where('date', $today)
+                ->when($search, function ($query, $search) {
+                    return $query->whereHas('user', function ($query) use ($search) {
+                        $query->where('name', 'like', "%{$search}%");
+                    });
+                })
+                ->paginate(10);
 
-        // Sort the collection based on custom status order
-        $daftar_user_day = $daftar_user_day->sort(function ($a, $b) use ($order) {
-            return $order[$a->status] <=> $order[$b->status];
-        });
+            // Define custom order for statuses
+            $order = [
+                'Pulang Cepat' => 1,
+                'Pulang' => 2,
+                'Terlambat' => 3,
+                'Hadir' => 4,
+            ];
 
-        // Return the view with sorted user days and users without records
-        return view('daftar_absen', [
-            'daftar_user_day' => $daftar_user_day,
-            'not_hadir_users' => $usersWithNoRecords,
-        ]);
+            // Sort the collection based on custom status order
+            $daftar_user_day = $daftar_user_day->sort(function ($a, $b) use ($order) {
+                return $order[$a->status] <=> $order[$b->status];
+            });
+
+            // Return the view with sorted user days and users without records
+            return view('daftar_absen', [
+                'daftar_user_day' => $daftar_user_day,
+                'not_hadir_users' => $usersWithNoRecords,
+            ]);
+        } else {
+            return redirect()->route('welcome');
+        }
     }
 
 

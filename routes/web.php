@@ -22,12 +22,9 @@ Route::put('/absen/update/{user_Day}', [UserDayController::class, 'update'])
     ->middleware(['auth', 'verified'])
     ->name('absen.update');
 
-Route::get('/daftar_absen', [UserDayController::class, 'daftar_absen'])
-    ->middleware(['auth', 'verified', 'owner'])
-    ->name('daftar_absen');
 
-Route::get('/daftar_absen', [UserDayController::class, 'daftar_absen'])
-    ->middleware(['auth', 'verified', 'supervisor'])
+Route::get('/daftar_absen', [UserDayController::class, 'daftar_absen']) // Logic rolenya di UserDayController
+    ->middleware(['auth', 'verified'])
     ->name('daftar_absen');
 
 Route::view('profile', 'profile')
