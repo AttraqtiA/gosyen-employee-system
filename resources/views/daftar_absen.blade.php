@@ -252,11 +252,11 @@
 
                 </div>
 
-                {{-- masih blm include yg sdh absen (?) --}}
+                {{-- masih blm include yg sdh absen (?)
                 <nav class="flex flex-col md:flex-row justify-end items-center space-y-3 md:space-y-0 p-4"
                     aria-label="Table navigation">
                     {{ $not_hadir_users->links('vendor.pagination.tailwind') }}
-                </nav>
+                </nav> --}}
 
             </div>
         </div>
