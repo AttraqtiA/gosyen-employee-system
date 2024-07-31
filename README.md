@@ -9,3 +9,6 @@ Feature Plan (26/07/2024)
 8. Any form of appreciation for the employees (?)
 9. Store Report or Notes, database and downloadable from /storage/files
 10. Motivation words n sentences in the footer, etc
+
+
+Don't forget php artisan storage:link
