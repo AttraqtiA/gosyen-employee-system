@@ -56,7 +56,7 @@ class UserDayController extends Controller
                 ->when($search, function ($query, $search) {
                     return $query->where('name', 'like', "%{$search}%");
                 })
-                ->paginate(10);
+                ->get();
 
             // Fetch user days for the specified date
             $daftar_user_day = User_Day::where('date', $today)
@@ -65,7 +65,7 @@ class UserDayController extends Controller
                         $query->where('name', 'like', "%{$search}%");
                     });
                 })
-                ->paginate(10);
+                ->get();
 
             // Define custom order for statuses
             $order = [
