@@ -11,6 +11,7 @@ $logout = function (Logout $logout) {
 
 ?>
 
+{{-- RIP wire:navigate --}}
 <nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -18,7 +19,7 @@ $logout = function (Logout $logout) {
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}" wire:navigate>
+                    <a href="{{ route('dashboard') }}">
                         <img src="https://gosyenpolinator.info/images/gosyen_logo.png" class="w-12 block fill-current"
                             alt="Logo">
                     </a>
@@ -27,20 +28,20 @@ $logout = function (Logout $logout) {
                 @auth
                     <!-- Navigation Links, routeIs bakal bikin otomatis active ~ -->
                     <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
+                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                             {{ __('Dashboard') }}
                         </x-nav-link>
                     </div>
 
                     <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                        <x-nav-link :href="route('absen')" :active="request()->routeIs('absen')" wire:navigate>
+                        <x-nav-link :href="route('absen')" :active="request()->routeIs('absen')">
                             {{ __('Absen') }}
                         </x-nav-link>
                     </div>
 
                     @if (Auth::user()->role == 2 || Auth::user()->role == 1)
                         <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                            <x-nav-link :href="route('daftar_absen')" :active="request()->routeIs('daftar_absen')" wire:navigate>
+                            <x-nav-link :href="route('daftar_absen')" :active="request()->routeIs('daftar_absen')">
                                 {{ __('Daftar Absen') }}
                             </x-nav-link>
                         </div>
@@ -76,7 +77,7 @@ $logout = function (Logout $logout) {
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
+                        <x-dropdown-link :href="route('profile')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
 
@@ -110,20 +111,20 @@ $logout = function (Logout $logout) {
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
         @auth
             <div class="pt-2 pb-3 space-y-1">
-                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
+                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                     {{ __('Dashboard') }}
                 </x-responsive-nav-link>
             </div>
 
             <div class="pt-2 pb-3 space-y-1">
-                <x-responsive-nav-link :href="route('absen')" :active="request()->routeIs('absen')" wire:navigate>
+                <x-responsive-nav-link :href="route('absen')" :active="request()->routeIs('absen')">
                     {{ __('Absen') }}
                 </x-responsive-nav-link>
             </div>
 
             @if (Auth::user()->role == 2 || Auth::user()->role == 1)
                 <div class="pt-2 pb-3 space-y-1">
-                    <x-responsive-nav-link :href="route('daftar_absen')" :active="request()->routeIs('daftar_absen')" wire:navigate>
+                    <x-responsive-nav-link :href="route('daftar_absen')" :active="request()->routeIs('daftar_absen')">
                         {{ __('Daftar Absen') }}
                     </x-responsive-nav-link>
                 </div>
@@ -139,7 +140,7 @@ $logout = function (Logout $logout) {
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile')" wire:navigate>
+                <x-responsive-nav-link :href="route('profile')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
 

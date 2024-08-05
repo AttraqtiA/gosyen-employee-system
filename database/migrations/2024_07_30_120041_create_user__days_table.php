@@ -21,7 +21,7 @@ return new class extends Migration
             $table->time('time_out')->nullable();
             $table->string('status');
             $table->string('proof_photo');
-            $table->string('description')->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }

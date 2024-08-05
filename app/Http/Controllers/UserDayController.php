@@ -39,56 +39,59 @@ class UserDayController extends Controller
     }
 
     public function daftar_absen(Request $request)
-    {
-        if (Auth::user()->role == 1 || Auth::user()->role == 2) {
+{
+    if (Auth::user()->role == 1 || Auth::user()->role == 2) {
 
-            $today = now()->toDateString();
+        // Get the selected date from the request, default to today's date
+        $selectedDate = $request->input('date', now()->toDateString());
 
-            // Get the search query from the request
-            $search = $request->input('search');
+        // Get the search query from the request
+        $search = $request->input('search');
 
-            // Fetch user IDs who have records for the specified date
-            $usersWithRecords = User_Day::where('date', $today)
-                ->pluck('user_id');
+        // Fetch user IDs who have records for the specified date
+        $usersWithRecords = User_Day::where('date', $selectedDate)
+            ->pluck('user_id');
 
-            // Fetch all users who do not have records for the specified date
-            $usersWithNoRecords = User::whereNotIn('id', $usersWithRecords)
-                ->when($search, function ($query, $search) {
-                    return $query->where('name', 'like', "%{$search}%");
-                })
-                ->get();
+        // Fetch all users who do not have records for the specified date
+        $usersWithNoRecords = User::whereNotIn('id', $usersWithRecords)
+            ->when($search, function ($query, $search) {
+                return $query->where('name', 'like', "%{$search}%");
+            })
+            ->get();
 
-            // Fetch user days for the specified date
-            $daftar_user_day = User_Day::where('date', $today)
-                ->when($search, function ($query, $search) {
-                    return $query->whereHas('user', function ($query) use ($search) {
-                        $query->where('name', 'like', "%{$search}%");
-                    });
-                })
-                ->get();
+        // Fetch user days for the specified date
+        $daftar_user_day = User_Day::where('date', $selectedDate)
+            ->when($search, function ($query, $search) {
+                return $query->whereHas('user', function ($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%");
+                });
+            })
+            ->get();
 
-            // Define custom order for statuses
-            $order = [
-                'Pulang Cepat' => 1,
-                'Pulang' => 2,
-                'Terlambat' => 3,
-                'Hadir' => 4,
-            ];
+        // Define custom order for statuses
+        $order = [
+            'Pulang Cepat' => 1,
+            'Pulang' => 2,
+            'Terlambat' => 3,
+            'Hadir' => 4,
+        ];
 
-            // Sort the collection based on custom status order
-            $daftar_user_day = $daftar_user_day->sort(function ($a, $b) use ($order) {
-                return $order[$a->status] <=> $order[$b->status];
-            });
+        // Sort the collection based on custom status order
+        $daftar_user_day = $daftar_user_day->sort(function ($a, $b) use ($order) {
+            return $order[$a->status] <=> $order[$b->status];
+        });
 
-            // Return the view with sorted user days and users without records
-            return view('daftar_absen', [
-                'daftar_user_day' => $daftar_user_day,
-                'not_hadir_users' => $usersWithNoRecords,
-            ]);
-        } else {
-            return redirect()->route('welcome');
-        }
+        // Return the view with sorted user days and users without records
+        return view('daftar_absen', [
+            'daftar_user_day' => $daftar_user_day,
+            'not_hadir_users' => $usersWithNoRecords,
+            'selectedDate' => $selectedDate,
+        ]);
+    } else {
+        return redirect()->route('welcome');
     }
+}
+
 
 
     /**
@@ -105,7 +108,8 @@ class UserDayController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'proof_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:5000', // ini untuk validasi file image
+            'proof_photo' => 'image|mimes:jpeg,png,jpg|max:5000', // ini untuk validasi file image
+            'description' => 'nullable|string',
         ]);
 
         $user_id = Auth::user()->id;
@@ -132,6 +136,7 @@ class UserDayController extends Controller
             'time_out' => null,
             'status' => $status,
             'proof_photo' => $validatedData['proof_photo'],
+            'description' => $validatedData['description'],
         ]);
 
         return redirect()->route('dashboard')->with('success', 'Absen berhasil');

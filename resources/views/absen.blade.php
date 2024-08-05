@@ -39,11 +39,17 @@
                                     <p class="mb-2 text-sm text-gray-500">
                                         <span class="font-semibold">Klik untuk upload</span>
                                     </p>
-                                    <p class="text-xs text-gray-500">PNG, JPG atau JPEG (Ukuran File MAX. 5MB)
-                                    </p>
+                                    <p class="text-xs text-gray-500">PNG, JPG atau JPEG (Ukuran File MAX. 5MB)</p>
                                 </div>
 
                             </label>
+                        </div>
+
+                        <!-- Keterangan Text Field -->
+                        <div class="w-3/4 mt-8">
+                            <textarea id="description" name="description" rows="4"
+                                class="block w-full mt-1 p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                placeholder="Masukkan Keterangan [Opsional]"></textarea>
                         </div>
 
                         <button type="submit" id="submitButton" disabled
@@ -103,6 +109,12 @@
                                 {{ 'Pulang: ' . $user_day->time_out . ' - ' . $user_day->status }}
                             </div>
                         @endif
+                    @endif
+
+                    @if($user_day->description != null)
+                        <div class="text-center text-gray-900 dark:text-gray-100">
+                            {{ 'Keterangan: ' . $user_day->description }}
+                        </div>
                     @endif
 
                     <img src="{{ asset('storage/' . $user_day->proof_photo) }}" alt="Bukti Absen"

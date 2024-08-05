@@ -13,10 +13,10 @@
                     <div
                         class="flex items-center justify-between flex-col flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900">
 
-                        <!-- Search Form -->
-                        <form method="GET" action="{{ route('daftar_absen') }}" class="mb-4">
-                            <label for="table-search-users" class="sr-only">Search</label>
+                        <!-- Search and Date Form -->
+                        <form method="GET" action="{{ route('daftar_absen') }}" class="mb-4 flex space-x-4 items-center">
                             <div class="relative">
+                                <label for="table-search-users" class="sr-only">Search</label>
                                 <div
                                     class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
                                     <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
@@ -29,11 +29,24 @@
                                     class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     placeholder="Cari nama user" value="{{ request('search') }}">
                             </div>
+
+                            <div class="relative">
+                                <label for="date-picker" class="sr-only">Select Date</label>
+                                <input type="date" id="date-picker" name="date"
+                                    class="block p-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    value="{{ request('date', now()->toDateString()) }}">
+                            </div>
+
+                            <button type="submit"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:bg-blue-700">
+                                Cari
+                            </button>
                         </form>
 
                         <div class="text-lg italic text-center p-2 text-gray-900 dark:text-gray-100">
-                            {{ \Carbon\Carbon::parse(now()->toDateString())->translatedFormat('l, d F Y') }}
+                            {{ \Carbon\Carbon::parse($selectedDate)->translatedFormat('l, d F Y') }}
                         </div>
+
                     </div>
                     <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -56,13 +69,16 @@
                                 <th scope="col" class="px-6 py-3">
                                     Bukti Foto
                                 </th>
+                                <th scope="col" class="px-6 py-3">
+                                    Keterangan
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
 
                             @if ($daftar_user_day->count() == 0 && $not_hadir_users->count() == 0)
                                 <tr>
-                                    <td colspan="6" class="p-4 text-center">
+                                    <td colspan="7" class="p-4 text-center">
                                         <p class="text-gray-400">Yah, hasil tidak ditemukan...</p>
                                     </td>
                                 </tr>
@@ -143,13 +159,27 @@
                                                 Lihat
                                             </button>
                                         </td>
+
+                                        @if($absen_info->description == null)
+                                            <td class="px-6 py-4">
+                                                <p class="text-gray-900 dark:text-white">
+                                                    -
+                                                </p>
+                                            </td>
+                                        @else
+                                        <td class="px-6 py-4">
+                                            <p class="text-gray-900 dark:text-white">
+                                                {{ $absen_info->description }}
+                                            </p>
+                                        </td>
+                                        @endif
                                     </tr>
                                 @endforeach
 
 
 
                                 {{-- modalnya nongol cuman kalau ada yg search include user hadir --}}
-                                @if (!$daftar_user_day->isEmpty())
+                                @if ($daftar_user_day->count() > 0)
                                     @foreach ($daftar_user_day as $absen_info)
                                         <div id="bukti_foto{{ $absen_info->user->id }}" tabindex="-1"
                                             aria-hidden="true"
@@ -166,8 +196,9 @@
                                                         <button type="button"
                                                             class="text-gray-900 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center"
                                                             data-modal-toggle="bukti_foto{{ $absen_info->user->id }}">
-                                                            <svg aria-hidden="true" class="w-5 h-5" fill="currentColor"
-                                                                viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                            <svg aria-hidden="true" class="w-5 h-5"
+                                                                fill="currentColor" viewbox="0 0 20 20"
+                                                                xmlns="http://www.w3.org/2000/svg">
                                                                 <path fill-rule="evenodd"
                                                                     d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
                                                                     clip-rule="evenodd" />
@@ -191,7 +222,6 @@
                                         </div>
                                     @endforeach
                                 @endif
-
                                 {{-- BELUM ABSEN KLUBB ------------------------------------------------------------------------------ --}}
 
                                 @foreach ($not_hadir_users as $ngilang_info)
@@ -243,6 +273,12 @@
                                         <td class="px-6 py-4">
                                             <p class="text-red-500 dark:text-red-400">
                                                 NO FOTO
+                                            </p>
+                                        </td>
+
+                                        <td class="px-6 py-4">
+                                            <p class="text-gray-900 dark:text-white">
+                                                -
                                             </p>
                                         </td>
                                     </tr>
