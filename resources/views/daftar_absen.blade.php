@@ -89,8 +89,16 @@
 
                                         <th scope="row"
                                             class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white">
-                                            <img class="w-10 h-10 rounded-full" src="{{ '' }}"
-                                                alt="Profile Picture">
+                                            @if ($absen_info->user->profile_picture != null || $absen_info->user->profile_picture != '')
+                                                <img class="w-10 h-10 rounded-full"
+                                                    src="{{ asset('storage/' . $absen_info->user->profile_picture) }}"
+                                                    alt="Profile Picture">
+                                            @else
+                                                <img class="w-10 h-10 rounded-full"
+                                                    src="https://img.icons8.com/?size=100&id=z-JBA_KtSkxG&format=png&color=000000"
+                                                    alt="Profile Picture">
+                                            @endif
+
                                             <div class="ps-3">
                                                 <div class="text-base font-semibold">{{ $absen_info->user->name }}</div>
                                                 <div class="font-normal text-gray-500">{{ $absen_info->user->email }}
@@ -246,8 +254,16 @@
 
                                         <th scope="row"
                                             class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white">
-                                            <img class="w-10 h-10 rounded-full" src="{{ '' }}"
-                                                alt="Profile Picture">
+                                            @if ($ngilang_info->profile_picture != null || $ngilang_info->profile_picture != '')
+                                                <img class="w-10 h-10 rounded-full"
+                                                    src="{{ asset('storage/' . $ngilang_info->profile_picture) }}"
+                                                    alt="Profile Picture">
+                                            @else
+                                                <img class="w-10 h-10 rounded-full"
+                                                    src="https://img.icons8.com/?size=100&id=z-JBA_KtSkxG&format=png&color=000000"
+                                                    alt="Profile Picture">
+                                            @endif
+
                                             <div class="ps-3">
                                                 <div class="text-base font-semibold">{{ $ngilang_info->name }}</div>
                                                 <div class="font-normal text-gray-500">{{ $ngilang_info->email }}

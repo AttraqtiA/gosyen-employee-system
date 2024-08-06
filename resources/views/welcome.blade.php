@@ -22,7 +22,7 @@
 
 <body class="antialiased font-sans">
     <div class="relative text-black dark:text-white">
-        <div class="relative bg-cover bg-center" style="background-image: url('/gosyen_asset/team_1.jpg');">
+        <div class="relative bg-cover bg-center" style="background-image: url('/gosyen_asset/brown_desk.jpg');">
 
             <div class="relative min-h-screen flex flex-col items-center justify-center selection:bg-[#FF2D20] selection:text-white">
                 <div class="relative bg-gray-900 w-10/12 md:w-1/2 max-w-2xl px-6 lg:max-w-7xl">

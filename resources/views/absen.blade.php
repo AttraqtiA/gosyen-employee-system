@@ -166,6 +166,7 @@
         });
 
 
+        // Location territory~
         function getUserLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(success, error);
