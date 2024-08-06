@@ -10,6 +10,8 @@ use App\Http\Requests\UpdateUser_DayRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
+// use Stevebauman\Location\Facades\Location;
 
 class UserDayController extends Controller
 {
@@ -17,11 +19,11 @@ class UserDayController extends Controller
      * Display a listing of the resource.
      */
 
-    public function index() // absen
+    public function index() // absen lur
     {
-        $today = now()->toDateString(); // Get today's date
+        $today = now()->toDateString();
 
-        // memang MERAH ini :")
+        // memang MERAH ini, tp work ya :")
         $sudahAbsenToday = Auth::user()->user_day()->where('date', $today)->exists();
         $userDay = Auth::user()->user_day()->where('date', $today)->first();
 
@@ -39,58 +41,50 @@ class UserDayController extends Controller
     }
 
     public function daftar_absen(Request $request)
-{
-    if (Auth::user()->role == 1 || Auth::user()->role == 2) {
+    {
+        if (Auth::user()->role == 1 || Auth::user()->role == 2) {
 
-        // Get the selected date from the request, default to today's date
-        $selectedDate = $request->input('date', now()->toDateString());
+            $selectedDate = $request->input('date', now()->toDateString());
 
-        // Get the search query from the request
-        $search = $request->input('search');
+            $search = $request->input('search');
 
-        // Fetch user IDs who have records for the specified date
-        $usersWithRecords = User_Day::where('date', $selectedDate)
-            ->pluck('user_id');
+            $usersWithRecords = User_Day::where('date', $selectedDate)
+                ->pluck('user_id');
 
-        // Fetch all users who do not have records for the specified date
-        $usersWithNoRecords = User::whereNotIn('id', $usersWithRecords)
-            ->when($search, function ($query, $search) {
-                return $query->where('name', 'like', "%{$search}%");
-            })
-            ->get();
+            $usersWithNoRecords = User::whereNotIn('id', $usersWithRecords)
+                ->when($search, function ($query, $search) {
+                    return $query->where('name', 'like', "%{$search}%");
+                })
+                ->get();
 
-        // Fetch user days for the specified date
-        $daftar_user_day = User_Day::where('date', $selectedDate)
-            ->when($search, function ($query, $search) {
-                return $query->whereHas('user', function ($query) use ($search) {
-                    $query->where('name', 'like', "%{$search}%");
-                });
-            })
-            ->get();
+            $daftar_user_day = User_Day::where('date', $selectedDate)
+                ->when($search, function ($query, $search) {
+                    return $query->whereHas('user', function ($query) use ($search) {
+                        $query->where('name', 'like', "%{$search}%");
+                    });
+                })
+                ->get();
 
-        // Define custom order for statuses
-        $order = [
-            'Pulang Cepat' => 1,
-            'Pulang' => 2,
-            'Terlambat' => 3,
-            'Hadir' => 4,
-        ];
+            $order = [
+                'Pulang Cepat' => 1,
+                'Pulang' => 2,
+                'Terlambat' => 3,
+                'Hadir' => 4,
+            ];
 
-        // Sort the collection based on custom status order
-        $daftar_user_day = $daftar_user_day->sort(function ($a, $b) use ($order) {
-            return $order[$a->status] <=> $order[$b->status];
-        });
+            $daftar_user_day = $daftar_user_day->sort(function ($a, $b) use ($order) {
+                return $order[$a->status] <=> $order[$b->status];
+            });
 
-        // Return the view with sorted user days and users without records
-        return view('daftar_absen', [
-            'daftar_user_day' => $daftar_user_day,
-            'not_hadir_users' => $usersWithNoRecords,
-            'selectedDate' => $selectedDate,
-        ]);
-    } else {
-        return redirect()->route('welcome');
+            return view('daftar_absen', [
+                'daftar_user_day' => $daftar_user_day,
+                'not_hadir_users' => $usersWithNoRecords,
+                'selectedDate' => $selectedDate,
+            ]);
+        } else {
+            return redirect()->route('welcome');
+        }
     }
-}
 
 
 
@@ -108,6 +102,8 @@ class UserDayController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
             'proof_photo' => 'image|mimes:jpeg,png,jpg|max:5000', // ini untuk validasi file image
             'description' => 'nullable|string',
         ]);
@@ -122,12 +118,29 @@ class UserDayController extends Controller
             $status = 'Terlambat';
         }
 
-        // php artisan storage:link
+        $latitude = $validatedData['latitude'];
+        $longitude = $validatedData['longitude'];
+
+        // Use Google Maps Geocoding API
+        $apiKey = env('GOOGLE_MAPS_API_KEY'); // Store your API key in the .env file
+
+        $response = Http::get("https://maps.googleapis.com/maps/api/geocode/json", [
+            'latlng' => "$latitude,$longitude",
+            'key' => $apiKey,
+        ]);
+
+        $address = '';
+        if ($response->successful() && isset($response['results'][0])) {
+            $address = $response['results'][0]['formatted_address'];
+        } else {
+            return response()->json(['success' => false, 'message' => 'Failed to retrieve address.']);
+        }
+
+        // php artisan storage:link, tapi untuk di Hostinger need to replace htaccess dan filesystems.php, contact me for the code!
         $validatedData['proof_photo'] = $request->file('proof_photo')->store('absen_images', ['disk' => 'public']);
         // disk public ini untuk membuat folder upload_images di folder storage/app/public
         // function store ini akan memasukkan gambar ke dalam storage/public/nama_folder_image
-        // dengan nama file yang sudah merupakan string random sehingga memungkinkan kita untuk
-        // memasukkan file gambar dengan nama yang sama tapii beda gambar.
+        // dengan nama file yang sudah merupakan string random sehingga memungkinkan kita untuk memasukkan file gambar dengan nama yang sama tapii beda gambar.
 
         User_Day::create([
             'user_id' => $user_id,
@@ -137,6 +150,7 @@ class UserDayController extends Controller
             'status' => $status,
             'proof_photo' => $validatedData['proof_photo'],
             'description' => $validatedData['description'],
+            'address' => $address,
         ]);
 
         return redirect()->route('dashboard')->with('success', 'Absen berhasil');
@@ -167,7 +181,7 @@ class UserDayController extends Controller
         $date = now();
         $dayOfWeek = $date->dayOfWeek; // aslinya bisa pakai time_now, tp biar ga bingung aja~
 
-        // Check if it's Saturday
+        // Check if it's Saturday, kok nggak libur :(
         if ($dayOfWeek == Carbon::SATURDAY) {
             $cutoffTime = '14:00:00';
         } else {
@@ -196,3 +210,31 @@ class UserDayController extends Controller
         //
     }
 }
+
+// BEKAS FIND ADDRESS BASED ON IP ADDRESS
+
+// $ip = $request->ip(); // Static IP: $ip = '162.159.24.227'
+// dd($ip);
+
+// // Using IPinfo API dari ipinfo.io to get location data
+// $response = Http::get("https://ipinfo.io/{$ip}/geo", [
+//     'token' => env('IPINFO_API_KEY'),
+// ]);
+
+// $locationData = $response->json();
+// $latLng = explode(',', $locationData['loc']);
+// $latitude = $latLng[0];
+// $longitude = $latLng[1];
+
+// // Use Google Maps Geocoding API
+// $apiKey = env('GOOGLE_MAPS_API_KEY');
+
+// $response = Http::get("https://maps.googleapis.com/maps/api/geocode/json", [
+//     'latlng' => "$latitude,$longitude",
+//     'key' => $apiKey,
+// ]);
+
+// $address = '';
+// if ($response->successful() && isset($response['results'][0])) {
+//     $address = $response['results'][0]['formatted_address'];
+// }

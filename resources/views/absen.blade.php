@@ -17,9 +17,11 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('absen.store') }}" method="POST" enctype="multipart/form-data"
-                        class="flex flex-col items-center">
+                    <form id="absenForm" action="{{ route('absen.store') }}" method="POST"
+                        enctype="multipart/form-data" class="flex flex-col items-center">
                         @csrf
+                        <input type="hidden" name="latitude" id="latitude">
+                        <input type="hidden" name="longitude" id="longitude">
 
                         <div id="imagePreview" class="mb-3 w-1/2 mx-auto"></div>
 
@@ -52,7 +54,7 @@
                                 placeholder="Masukkan Keterangan [Opsional]"></textarea>
                         </div>
 
-                        <button type="submit" id="submitButton" disabled
+                        <button type="button" onclick="getUserLocation()" id="submitButton"
                             class="cursor-pointer my-8 w-3/4 md:w-1/2 text-white bg-blue-500 font-medium rounded-lg text-base px-5 py-2.5 text-center items-center">
                             ABSEN
                         </button>
@@ -111,7 +113,7 @@
                         @endif
                     @endif
 
-                    @if($user_day->description != null)
+                    @if ($user_day->description != null)
                         <div class="text-center text-gray-900 dark:text-gray-100">
                             {{ 'Keterangan: ' . $user_day->description }}
                         </div>
@@ -162,5 +164,30 @@
         document.addEventListener('DOMContentLoaded', function() {
             checkFileInput();
         });
+
+
+        function getUserLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(success, error);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        function success(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+
+            // Set the values in hidden input fields
+            document.getElementById('latitude').value = latitude;
+            document.getElementById('longitude').value = longitude;
+
+            // Automatically submit the form once coordinates are set
+            document.getElementById('absenForm').submit();
+        }
+
+        function error() {
+            alert("Unable to retrieve your location.");
+        }
     </script>
 </x-app-layout>

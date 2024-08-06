@@ -217,6 +217,22 @@
                                                             class="mt-3 text-red-700 text-center font-semibold text-gray-900">
                                                             Somehow No Bukti Foto?!</p>
                                                     @endif
+
+                                                    @if ($absen_info->description != null)
+                                                        <div class="mt-4">
+                                                            <p class="text-center text-blue-900">
+                                                                {{ $absen_info->description }}
+                                                            </p>
+                                                        </div>
+                                                    @endif
+
+                                                    @if ($absen_info->address != null)
+                                                        <div class="mt-4">
+                                                            <p class="text-center text-gray-900">
+                                                                {{ "Lokasi : " . $absen_info->address }}
+                                                            </p>
+                                                        </div>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
